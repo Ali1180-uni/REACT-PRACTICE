@@ -62,7 +62,7 @@ First we can pass a function and second time a Dependency
       punchline: jsonResponse.punchline,
     });
   };
-  useEffect(() => { // Useunf useEffect and always write the async function in an arrow function in it
+  useEffect(() => { // Using useEffect and always write the async function in an arrow function in it
     async function firstJoke() {
       let response = await fetch(URL);
       let jsonResponse = await response.json();
@@ -73,3 +73,39 @@ First we can pass a function and second time a Dependency
     }
     firstJoke(); // And call it here outside of the function
   }, []); // this can done that the Joke will be shown on the page when for render first time
+
+
+  useState and useEffects are Hooks:
+
+//use when we want to perform something multiple time conditionally on props and useState
+  useEffect(() => {
+    document.title = `Tasbeeh Count: ${count}`;
+  }, [count])
+
+//Use when we just want to perform anything onetime
+    useEffect(() => { 
+    alert("this is here");
+  }, [])
+
+//Use everytime when page reRender
+    useEffect(() => { 
+    alert("this is here");
+  })
+
+//Use when we just want to remove any component
+-> It run when a Component Removed Like in conditionally Navbar is showing on page and then just removed dynamically then it runs 
+-> Mostly used when we want to break any server connection
+
+    useEffect(() => { 
+    alert("this is here");
+    return ()=>{
+        alert("Files are change");
+    }
+  }, [])  ---> we can add multiple things things in [] this bracket
+
+<Navbar home = "Home" about = "About" contact = "Contact" color = {color}/>
+
+  : Learning we use useState to change the state of Specific value or component
+  : and we use useEffect when we are performing some Action on the basis of that chnage in state 
+
+  it might be on each re-render of full page or re-render of Specific component and value

@@ -1,0 +1,27 @@
+use Ref is the Function which is use to make refernece some elements in the React
+-> It used when we want to use something without re-rendering 
+
+  const refCount = useRef(0); //Created a useRef it stops page to re-render
+
+  useEffect(() => {
+    refCount.current = refCount.current + 1;
+    console.log("Component re-rendered "+ refCount.current + " times");
+  });
+
+  -> We never wnat to display the useRef on display page bcz it stop the reRender
+  -> we can also use it to make refence of some component or element like button
+
+-> We can Access the Reference value by using the "current"
+  const btnRef = useRef();
+  const btnRef1 = useRef();
+
+-> This is how we Assign the refernece to specific element
+        <button ref={btnRef1} onClick={inc}>MashaAllah Bro!!</button>
+        <button ref={btnRef} onClick={() => { setCount(0); }}> Reset </button>
+
+We can always change the maximum states of useRef with useEffect
+        <button onClick={() => {
+          btnRef.current.style.backgroundColor = "black";
+          btnRef.current.style.color = "white";
+          btnRef1.current.style.fontSize = "2000px";
+        }}>Change styling</button>
