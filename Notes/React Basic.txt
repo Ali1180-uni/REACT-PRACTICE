@@ -64,3 +64,8 @@ function App() {
   );
 }
  ->  <like/ > in this way we use our tag
+
+
+ Every type of Javascript must be written in {}
+
+ eg {count?<button>new</button>:<button>old</button>} --> it show only the new when count is true otherwise old button
