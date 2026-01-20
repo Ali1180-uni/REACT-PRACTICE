@@ -1,0 +1,24 @@
+Always Fetch Api in the useEffect
+  useEffect(() => {
+    fetch("https://jsonplaceholder.typicode.com/comments")
+      .then((res) => {
+        return res.json(); // Must Return the JSON
+      })
+      .then((resData) => {
+        setdata(resData);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }, []);
+
+
+Make a Data Array State and use to show data from there
+  const [data, setdata] = useState([]);
+
+This is How we can show the Data
+      {data.map(info => {
+        return (
+          <Card key={info.id} name={info.name} email={info.email} body={info.body} />
+        )
+      })}

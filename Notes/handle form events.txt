@@ -1,0 +1,15 @@
+We can use the 
+e.target.value --> handle the form usestate value
+
+--> This is how we can handle the multiple forms state by using the single funtion
+
+  const [value, setvalue] = useState([{name: "", phone: ""}])
+  const handleForm = (e) =>{
+    setvalue({...value, [e.target.name]:e.target.value});
+  }
+
+
+-> Always setup a name and value to make the change in the specific one
+
+<div><input type="text" name="name" value={value.name} onChange={handleForm}/></div>
+<div><input type="number" name="email" value={value.phone} onChange={handleForm} /></div>

@@ -1,33 +1,21 @@
-import { useEffect, useState } from "react";
-import Navbar from "./Components/Navbar";
-import Card from "./Components/Card";
+/* eslint-disable react-hooks/set-state-in-effect */
+import { useState } from "react";
 import "./App.css";
 
 function App() {
-  const [data, setdata] = useState([]);
-  useEffect(() => {
-    fetch("https://jsonplaceholder.typicode.com/comments")
-      .then((res) => {
-        return res.json();
-      })
-      .then((resData) => {
-        setdata(resData);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  }, []);
+  const [value, setvalue] = useState([{name: "", phone: ""}])
+  const handleForm = (e) =>{
+    setvalue({...value, [e.target.name]:e.target.value});
+  }
 
   return (
-    <>
-      <Navbar />
-      <h1>Data is Shown Below</h1>
-      {data.map(info => {
-        return (
-          <Card key={info.id} name={info.name} email={info.email} body={info.body} />
-        )
-      })}
-    </>
+    <div>
+      <button onClick={()=>{
+        alert("Name");
+      }}>Ali Here</button>
+      <div><input type="text" name="name" value={value.name} onChange={handleForm}/></div>
+      <div><input type="number" name="email" value={value.phone} onChange={handleForm} /></div>
+    </div>
   );
 }
 
