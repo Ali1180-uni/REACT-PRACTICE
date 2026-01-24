@@ -1,6 +1,8 @@
 import { useState } from "react";
 import Navbar from "./Components/Navbar";
 import { nanoid } from "nanoid";
+import ShowTodos from "./Components/ShowTodos";
+
 import "./App.css";
 
 function App() {
@@ -16,15 +18,6 @@ function App() {
     setnewTodo("");
   };
 
-  // const editTodo = (id) => {
-
-  // };
-
-  // // const deleteTodo = (id) => {
-  // //   setTodo(id.todo !== items);
-
-  // // };
-
   return (
     <>
       <Navbar />
@@ -38,36 +31,7 @@ function App() {
         />
         <button className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg disabled:bg-gray-400 disabled:cursor-not-allowed" onClick={AddTodo} disabled = {newTodo.length < 3}>ADD</button>
       </div>
-      {todo.map((items) => {
-        return (
-          <div className="ShowTodos flex gap-4 items-center justify-center p-3 m-2 bg-white rounded-lg shadow-md max-w-lg mx-auto" key={items.id}>
-            <input
-              className="w-5 h-5 cursor-pointer accent-blue-500"
-              type="checkbox"
-              checked={items.isCompleted}
-              onChange={() => {
-                setTodo(
-                  todo.map((t) =>
-                    items.id === t.id
-                      ? { ...t, isCompleted: !t.isCompleted }
-                      : t,
-                  ),
-                );
-              }}
-            />
-            <p
-              className="flex-1 text-lg"
-              style={{
-                textDecoration: items.isCompleted ? "line-through" : "none",
-              }}
-            >
-              {items.text}
-            </p>
-            {/* <button onClick={editTodo}>Edit</button>
-            <button onClick={deleteTodo}>Delete</button> */}
-          </div>
-        );
-      })}
+      <ShowTodos todo={todo} setTodo={setTodo} setnewTodo={setnewTodo}/>
     </>
   );
 }
