@@ -1,0 +1,73 @@
+It is the USeful tool which helps to Create the Redirection Smooth
+With the help of this not every time the page is Reload and make the Redirection more Smooth
+
+-> npm i react-router-dom
+-> Use Code :
+
+// This Implemetation is done in the App.jsx
+Basic Concepts We Have "Create Browser Router" which helps to make Redirection the components
+
+  This is basically the Array of Objects Which Contains the "Path" & "element" which are redirected
+
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import './index.css'
+import App from './App.jsx'
+import Navbar from "./Components/Navbar";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import Home from "./Components/Router Practice/Home";
+import About from "./Components/Router Practice/About";
+import Contact from "./Components/Router Practice/Contact";
+
+// Define routes OUTSIDE the component to avoid recreation on every render
+const routes = createBrowserRouter([
+  {
+    path: "/",
+    element: (
+      <>
+        <Navbar />
+        <Home />
+      </>
+    ),
+  },
+  {
+    path: "/about",
+    element: (
+      <>
+        <Navbar />
+        <About />
+      </>
+    ),
+  },
+  {
+    path: "/contact",
+    element: (
+      <>
+        <Navbar />
+        <Contact />
+      </>
+    ),
+  },
+]);
+
+createRoot(document.getElementById('root')).render(
+  <StrictMode>
+    <RouterProvider router={routes} />;  // Where We Perform Redirection so thats why we used it in whole file
+    <App />
+  </StrictMode>,
+)
+
+Elements are Wraped from which Component they Perform Routing
+
+For this we used the "Link" & "NavLink" instead of Anchor Tag and "to" instead of "herf"
+
+import { NavLink } from "react-router-dom";
+import { Link } from "react-router-dom";
+
+NavLink is the enhanced version in which we used the classes for styling
+
+--->  <NavLink to="/about" className={({ isActive }) => (isActive ? "active" : "")}> About </NavLink>
+
+And in Single link we never use the classes
+
+---> <Link to="/about"> About </Link>
