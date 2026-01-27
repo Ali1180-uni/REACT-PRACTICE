@@ -1,4 +1,5 @@
 import React from 'react'
+import About from './Router Practice/About'
 import './card.css'
 
 const Card = ({name, email, body}) => {
@@ -7,6 +8,7 @@ const Card = ({name, email, body}) => {
       <h3>{name}</h3>
       <h2>{email}</h2>
       <p>{body}</p>
+      <About/>
     </div>
   )
 }
