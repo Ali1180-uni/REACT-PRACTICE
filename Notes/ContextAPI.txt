@@ -25,3 +25,22 @@ import { counterContext } from "./Context/counter";
       </counterContext.Provider>
     </div>
  
+
+ now if we use the react router dom in main.jsx use the provider there
+Also manage it in the Component or where You use it 
+
+import React, { useContext } from 'react'
+import { counterContext } from '../../Context/counter'  // Always Get the .js file from the counter 
+
+const About = () => {
+  const { Count, setCount } = useContext(counterContext)  // Here we get the Value
+  return (
+    <div>
+      <h2>About Page</h2>
+      <p>Counter Value: {Count}</p>
+      <button onClick={() => setCount(Count + 1)}>Increment from About</button> // Now we can use it anywhere
+    </div>
+  )
+}
+
+export default About
