@@ -44,3 +44,38 @@ const About = () => {
 }
 
 export default About
+
+
+Main Code:-
+
+(counter.js)
+import { createContext } from "react";
+
+export const counterContext = createContext(0);
+
+(App.jsx):-
+import { counterContext } from "./Context/counter";
+
+(Wrapping):-
+      <counterContext.Provider value={{Count, setCount}}>
+      <Navbar />
+      <button className="btn" onClick={() => setCount(Count + 1)}>
+        Click: {Count}
+      </button>
+      </counterContext.Provider>
+
+(Where we use the Prop):-
+import { counterContext } from '../../Context/counter'
+
+const About = () => {
+  const { Count, setCount } = useContext(counterContext)  ---> This
+  return (
+    <div>
+      <h2>About Page</h2>
+      <p>Counter Value: {Count}</p>
+      <button onClick={() => setCount(Count + 1)}>Increment from About</button>
+    </div>
+  )
+}
+
+export default About

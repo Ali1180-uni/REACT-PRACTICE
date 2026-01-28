@@ -1,0 +1,44 @@
+Basically UseMemo is a Hook which is Used to Avoid the App Crash on Heavy Tasks
+like an Array of 30M enetities so we get the number which is too Far but we Not want to Re-Render All Components on Each Change in State
+So we Use --> useMemo() Hook here to Handle this problem easily
+
+Syntax:-
+
+import { useState, useMemo} from "react";
+
+Test Case:  we are creating an array of 30M and Finding the Value true at 29M
+
+const nums = new Array(30_000_000).fill(0).map((_, i)=>{
+  return {
+    index: i,
+    isMagical: i===29_000_000
+  }
+})
+
+But Now The Problem is on Each Re-Render or Change of State it Again Find the Value and perform 29M operation 
+so we use the useMemo() which Memoize it and Just Make operation when needed to Avoid App to Crash
+
+  const [count, setCount] = useState(0)
+  const [numbers, setNumbers] = useState(nums)
+
+  // const magical = numbers.find(item=>item.isMagical===true) // Expensive Computation
+  const magical = useMemo(() => numbers.find(item=>item.isMagical===true), [numbers]) // [numbers] --> Represent if this State Chnage perform the calculations
+
+
+    <span>Magical number is {magical.index}</span>   // Here we Se the Value
+      <div className="card">
+        <button onClick={() => {
+          setCount((count) => count + 1);
+          if(count == 10){
+            setNumbers(new Array(10_000_000).fill(0).map((_, i)=>{
+              return {
+                index: i,
+                isMagical: i===9_000_000  // Now Here we Change the "number" state and now 
+              }
+            }))
+          }
+        
+        }}>
+          count is {count}
+        </button>
+      </div>
