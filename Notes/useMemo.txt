@@ -22,7 +22,7 @@ so we use the useMemo() which Memoize it and Just Make operation when needed to 
   const [numbers, setNumbers] = useState(nums)
 
   // const magical = numbers.find(item=>item.isMagical===true) // Expensive Computation
-  const magical = useMemo(() => numbers.find(item=>item.isMagical===true), [numbers]) // [numbers] --> Represent if this State Chnage perform the calculations
+  const magical = useMemo(() => numbers.find(item=>item.isMagical===true), [numbers]) // [numbers] --> Represent if this State Chnage perform the calculations (Dependency Array)
 
 
     <span>Magical number is {magical.index}</span>   // Here we Se the Value

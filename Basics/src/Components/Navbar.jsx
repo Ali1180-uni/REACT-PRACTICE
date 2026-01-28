@@ -1,22 +1,14 @@
-import "./nav.css";
-import Card from "./Card";
+import React from 'react'
+import { memo } from 'react'
 
-const Navbar = () => {
+const Navbar = ({adjective, getAdjective}) => {
+    console.log("Navbar is rendered")
   return (
     <div>
-      <div className="navbar">
-        <a href="/">Home</a>
-        <a href="/about">About</a>
-        <a href="/contact">Contact</a>
-        <span>
-          <button>Signup</button>
-        </span>
-      </div>
-      <div>
-        <Card name={"Ali"} email={"Khalid"} body={"About noting is happening and why it is happening"}/>
-      </div>
+      I am a {adjective} Navbar
+      <button onClick={()=>{getAdjective()}}>{getAdjective()}</button>
     </div>
-  );
-};
+  )
+}
 
-export default Navbar;
+export default memo(Navbar)

@@ -1,0 +1,90 @@
+ok in the Re-Rendering There are lots of things that we must take care
+like Not Un-nessessary Rendering eg: Navbar Elemets not to Re-Render if the Props not change
+
+ok We have Concept of Memo Which Stops out Component to not to re-render everytime just re-render when props of that component change only
+
+Syntax:-
+
+import { memo } from 'react' // import memo
+
+const Navbar = ({adjective, getAdjective}) => {  // Not it only re-Render when the adjective value change otherwise no change
+    console.log("Navbar is rendered")
+  return (
+    <div>
+      I am a {adjective} Navbar
+      <button onClick={()=>{getAdjective()}}>{getAdjective()}</button>
+    </div>
+  )
+}
+
+export default memo(Navbar) // Setting component memo
+
+ok Adjective is a Function in app.jsx:-
+
+  const getAdjective = () => { --> In JS (if we create the func() with same name and same attributes its always different)
+    return "another" + count
+  }
+
+  const getAdjective2 = () => { --> Function 2 with same data but diff name 
+    return "another" + count
+  }
+
+if we set getAdjective2 === getAdjective --> it returns "False"
+
+like Now ->>>>  getAdjective2 != getAdjective ->> Thats why "Memo" is not work Here 
+
+
+----> In This Case useCallback Hook is Work Basically it Freeze the Function or Value and as same it has also a Dependency Array
+
+Syntax:-
+
+  const getAdjective = useCallback(() => { // Now this is How we Wrap the Function with the Help of useCallback hook
+    return "another" + count;
+  }, [count]); // Dependency Array --> Means un-freeze Values only when "Count" change and we also pass multiple as an object
+
+Now Here:-
+
+When We Pass Single Function Without "Count" --> Memo works and Avoid Un-nessessary Re-Rendering
+
+but now we have "Count" and on every change of "count" we want change value but only other States to change 
+
+-> if there a multiple States we use the Dependecy Arrays to Trigger that only
+
+
+
+
+
+
+import { useState, useCallback } from "react";
+import Navbar from "./Components/Navbar"
+
+function App() {
+  const [count, setCount] = useState(0);
+  const [adjective, setAdjective] = useState("good");
+
+  // const getAdjective = () => {
+  //   return "another" + count
+  // }
+
+  const getAdjective = useCallback(() => {
+    return "another" + count;
+  }, [count]);
+
+  return (
+    <>
+      <h1>Vite + React</h1>
+      <Navbar adjective={"good"} getAdjective={getAdjective} />
+      <div className="card">
+        <button
+          onClick={() => {
+            setCount((count) => count + 1);
+          }}
+        >
+          count is {count}
+        </button>
+      </div>
+    </>
+  );
+}
+
+export default App;
