@@ -1,0 +1,45 @@
+React Hook Form is the Efficient Library which helps to Handle the forms Efficiently like 
+-> Validation
+-> Handle Submit
+-> Also Handle Form Errors
+
+Installation:
+npm install react-hook-form
+
+Syntax:-
+
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors }, // To Extract Errors
+  } = useForm()
+
+
+Small Example:-
+
+<input
+   placeholder="Username"
+  {...register("username", { // Set the Name According to which this form handle
+    required: {value: true, message: "This Feild is Required"},
+    maxLength: {value: 10, message: "Max-Length is 10"},
+    minLength: {value: 3, message: "Min-Length is 3"},   // Min length Value and Error Message
+  })}
+   type="text"
+  className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+/>
+
+
+{errors.password && <div className="text-red-500 text-sm">{errors.password.message}</div>}  ->>> errors.password or username is that name which is written after "...register"
+
+
+Handle Form Example (To Connect with Backend):-
+
+ <form onSubmit={handleSubmit(submit)} className="flex flex-col gap-4">...</form>
+
+ Now handleSubmit(func) --> Function which Perform Submitting Smoothly
+
+
+ Now We Have Some More Functionalities ---->
+
+ 

@@ -26,37 +26,31 @@ function App() {
             Login Here
           </h1>
 
-          <form
-            onSubmit={handleSubmit(submit)}
-            className="flex flex-col gap-4"
-          >
+          <form onSubmit={handleSubmit(submit)} className="flex flex-col gap-4">
             <input
               placeholder="Username"
               {...register("username", {
-                required: true,
-                maxLength: 10,
-                minLength: 3,
+                required: {value: true, message: "This Feild is Required"},
+                maxLength: {value: 10, message: "Max-Length is 10"},
+                minLength: {value: 3, message: "Min-Length is 3"},
               })}
               type="text"
               className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
 
-            {errors.username && (
-              <div className="text-red-500 text-sm">
-                There is Some Error in Username
-              </div>
-            )}
+            {errors.username && <div className="text-red-500 text-sm">{errors.username.message}</div>}
 
             <input
               placeholder="Password"
               {...register("password", {
-                required: true,
-                maxLength: 10,
-                minLength: 3,
+                required: {value: true, message: "This Feild is Required"},
+                minLength: {value: 3, message: "Min-Length is 3"},
               })}
               type="password"
               className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
+
+            {errors.password && <div className="text-red-500 text-sm">{errors.password.message}</div>}
 
             <button
               type="submit"
