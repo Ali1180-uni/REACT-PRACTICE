@@ -37,9 +37,59 @@ Handle Form Example (To Connect with Backend):-
 
  <form onSubmit={handleSubmit(submit)} className="flex flex-col gap-4">...</form>
 
- Now handleSubmit(func) --> Function which Perform Submitting Smoothly
-
-
- Now We Have Some More Functionalities ---->
+ Now handleSubmit(submit) --> Function which Perform Submitting Smoothly
 
  
+  const submit = (Data) => {
+      console.log(Data)
+  }
+
+-> This Provide us the Object of form Data Submitted
+
+ Now We Have Some More Functionalities ----> Like Loading to Submit or Aysnc Calls To submit Data
+
+For this purpose we have a Function isSubmitting in the formState()
+
+  const {
+    register,
+    handleSubmit,
+    setError,    
+    formState: { errors, isSubmitting },
+  } = useForm();
+
+<button
+  type="submit"
+  disabled={isSubmitting} // Button is disabled until Form is not Submitted
+  className="mt-4 bg-blue-600 text-white py-2 rounded-md font-semibold hover:bg-blue-700 transition duration-300"
+>
+
+Also Show Loading ---> 
+
+Basically i Used the Tailwind Loading
+
+      {isSubmitting && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="bg-white p-6 rounded-lg shadow-xl flex flex-col items-center gap-3">
+            <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+            <span className="text-gray-700 font-medium">Loading...</span>
+          </div>
+        </div>
+      )}
+
+
+Handling Custom Errors --> 
+We can handle the custom Errors by Adding the Function Name
+->setError
+
+
+  const {
+    register,
+    handleSubmit,
+    setError,   ->>>> This can Used to Manage the Custom Errors
+    formState: { errors, isSubmitting },
+  } = useForm();
+
+
+  like:->
+
+  

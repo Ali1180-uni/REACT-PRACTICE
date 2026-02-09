@@ -1,22 +1,29 @@
-import { useState, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import "./App.css";
 
 function App() {
-  const [count, setCount] = useState(0);
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    setError,
+    formState: { errors, isSubmitting },
   } = useForm();
 
-  const submit = useCallback(() => {
-    setCount((prev)=>{
-      let newCount = prev+1;
-      console.log("Data Submit " + newCount);
-      return newCount;
-    });
-  },[]);
+  const delay = (d) => {
+    return new Promise((res, rej) => {
+      setTimeout(() => {
+        res();
+      }, d * 1000);
+    })
+  };
+
+  const submit = async (Data) => {
+    await delay(2);
+    console.log(Data);
+    if(Data.username !== "Ali"){
+      setError("formError", {message:"This is Not Correct info"})
+    }
+  };
 
   return (
     <>
@@ -30,30 +37,39 @@ function App() {
             <input
               placeholder="Username"
               {...register("username", {
-                required: {value: true, message: "This Feild is Required"},
-                maxLength: {value: 10, message: "Max-Length is 10"},
-                minLength: {value: 3, message: "Min-Length is 3"},
+                required: { value: true, message: "This Feild is Required" },
+                maxLength: { value: 10, message: "Max-Length is 10" },
+                minLength: { value: 3, message: "Min-Length is 3" },
               })}
               type="text"
               className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
 
-            {errors.username && <div className="text-red-500 text-sm">{errors.username.message}</div>}
+            {errors.username && (
+              <div className="text-red-500 text-sm">
+                {errors.username.message}
+              </div>
+            )}
 
             <input
               placeholder="Password"
               {...register("password", {
-                required: {value: true, message: "This Feild is Required"},
-                minLength: {value: 3, message: "Min-Length is 3"},
+                required: { value: true, message: "This Feild is Required" },
+                minLength: { value: 3, message: "Min-Length is 3" },
               })}
               type="password"
               className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
 
-            {errors.password && <div className="text-red-500 text-sm">{errors.password.message}</div>}
+            {errors.password && (
+              <div className="text-red-500 text-sm">
+                {errors.password.message}
+              </div>
+            )}
 
             <button
               type="submit"
+              disabled={isSubmitting}
               className="mt-4 bg-blue-600 text-white py-2 rounded-md font-semibold hover:bg-blue-700 transition duration-300"
             >
               Login
@@ -61,6 +77,21 @@ function App() {
           </form>
         </div>
       </div>
+
+      {errors.formError && (
+        <div className="text-red-500 text-sm">
+          {errors.formError.message}
+        </div>
+      )}
+
+      {isSubmitting && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="bg-white p-6 rounded-lg shadow-xl flex flex-col items-center gap-3">
+            <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+            <span className="text-gray-700 font-medium">Loading...</span>
+          </div>
+        </div>
+      )}
     </>
   );
 }

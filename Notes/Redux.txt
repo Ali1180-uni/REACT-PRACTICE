@@ -1,0 +1,7 @@
+Redux is the toolkit or library which is like the store of all the states in the React app which is very helpful
+to manage the states globally in the whole app very efficiently also Smoothly
+
+-> Good For Big Applications
+-> Same like Context Api
+
+Provider -->  In React is like a wrapper to wrap the whole app and give it the abilities of specific library
