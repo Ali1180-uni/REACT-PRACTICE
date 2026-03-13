@@ -3,23 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Neon Highway 3D: Day Edition</title>
+    <title>Turbo Rush 3D: Production Edition</title>
     <!-- Import Three.js from CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Montserrat:ital,wght@0,400;0,700;1,900&display=swap');
+
         :root {
-            --neon-blue: #00f3ff;
-            --neon-pink: #ff00ff;
-            --neon-yellow: #ffcc00;
-            --neon-green: #4cff76;
+            --primary: #ff3366;
+            --secondary: #00f3ff;
+            --warning: #ffcc00;
+            --success: #4cff76;
+            --dark: #0f172a;
         }
 
         body {
             margin: 0;
             overflow: hidden;
-            background-color: #87CEEB; /* Day Sky Color */
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #000;
+            font-family: 'Montserrat', sans-serif;
             user-select: none;
+            -webkit-touch-callout: none;
             touch-action: none;
         }
 
@@ -33,957 +37,1036 @@
             display: block;
             width: 100%;
             height: 100%;
+            transition: filter 0.3s ease;
         }
 
-        /* HUD & UI */
+        /* HUD UI */
         .ui-layer {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0; width: 100%; height: 100%;
             pointer-events: none;
-            padding: 20px;
+            padding: 2vw;
             box-sizing: border-box;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
+            z-index: 5;
         }
 
         .hud-top {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            gap: 12px;
+            align-items: flex-start;
         }
 
-        .hud-stat {
-            background: rgba(0, 0, 0, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.4);
+        .score-board {
+            display: flex;
+            gap: 20px;
+        }
+
+        .hud-panel {
+            background: rgba(15, 23, 42, 0.7);
+            border-left: 4px solid var(--secondary);
             padding: 10px 20px;
-            border-radius: 4px;
-            color: #fff;
-            font-weight: 800;
-            text-transform: uppercase;
-            font-size: 18px;
-            letter-spacing: 2px;
+            color: white;
             transform: skew(-10deg);
-            backdrop-filter: blur(4px);
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            backdrop-filter: blur(8px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
         }
 
-        .hud-stat span {
+        .hud-panel span {
             display: block;
-            font-size: 12px;
-            color: var(--neon-blue);
-            margin-bottom: 2px;
-        }
-
-        .hud-stat.danger { border-color: #ff0055; color: #ff0055; }
-        .hud-stat.turbo { border-color: var(--neon-yellow); color: var(--neon-yellow); }
-
-        .hud-bottom {
-            display: grid;
-            grid-template-columns: repeat(3, minmax(120px, 220px));
-            gap: 12px;
-            align-self: flex-start;
-        }
-
-        .meter {
-            background: rgba(0, 0, 0, 0.55);
-            border: 1px solid rgba(255, 255, 255, 0.35);
-            border-radius: 6px;
-            padding: 8px 10px;
-            color: #fff;
-            font-size: 11px;
-            letter-spacing: 1px;
+            font-size: 0.7rem;
             text-transform: uppercase;
-            font-weight: 700;
-            backdrop-filter: blur(4px);
+            letter-spacing: 2px;
+            color: #94a3b8;
+            margin-bottom: 4px;
         }
 
-        .meter-fill-wrap {
-            margin-top: 6px;
-            height: 8px;
-            border-radius: 999px;
+        .hud-panel .value {
+            font-family: 'Black Ops One', cursive;
+            font-size: 1.8rem;
+            letter-spacing: 1px;
+            text-shadow: 0 0 10px rgba(255,255,255,0.3);
+        }
+
+        .hud-panel.danger { border-color: var(--primary); color: var(--primary); animation: pulse 1s infinite; }
+        .hud-panel.turbo { border-color: var(--warning); color: var(--warning); }
+
+        .meters {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: clamp(200px, 25vw, 300px);
+        }
+
+        .meter-container {
+            background: rgba(0,0,0,0.5);
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .meter-label {
+            color: white;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .meter-track {
+            height: 10px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
             overflow: hidden;
-            background: rgba(255, 255, 255, 0.2);
         }
 
         .meter-fill {
             height: 100%;
             width: 100%;
-            transform-origin: left center;
-            transition: transform 0.15s linear;
+            transform-origin: left;
+            transition: transform 0.1s linear;
         }
 
-        .meter-fill.health { background: linear-gradient(90deg, #ff0055, #ff7b54); }
-        .meter-fill.fuel { background: linear-gradient(90deg, #ffc107, #ffe066); }
-        .meter-fill.turbo { background: linear-gradient(90deg, #00f3ff, #4cff76); }
+        .fill-health { background: linear-gradient(90deg, #ff0055, #ff3366); }
+        .fill-fuel { background: linear-gradient(90deg, #d97706, #fbbf24); }
+        .fill-turbo { background: linear-gradient(90deg, #0284c7, #38bdf8); }
 
-        #pauseTag {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 42px;
-            color: #fff;
-            font-weight: 900;
-            letter-spacing: 4px;
-            text-shadow: 0 0 18px var(--neon-blue), 2px 2px 0 #000;
-            display: none;
-        }
-
-        /* SCREENS */
+        /* Screens */
         .screen {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.7); /* Slightly more transparent for day */
+            inset: 0;
+            background: radial-gradient(circle at center, rgba(15,23,42,0.8) 0%, rgba(0,0,0,0.95) 100%);
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             z-index: 10;
+            transition: opacity 0.5s ease, backdrop-filter 0.5s ease;
+            backdrop-filter: blur(10px);
             pointer-events: auto;
-            transition: opacity 0.4s;
         }
 
-        .hidden {
-            opacity: 0;
-            pointer-events: none;
-        }
+        .hidden { opacity: 0; pointer-events: none; backdrop-filter: blur(0px); }
 
-        h1 {
-            font-size: 60px;
-            color: #fff;
+        .title {
+            font-family: 'Black Ops One', cursive;
+            font-size: clamp(3rem, 8vw, 6rem);
+            color: transparent;
+            -webkit-text-stroke: 2px var(--secondary);
+            background: linear-gradient(180deg, #fff 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
             margin: 0;
-            text-transform: uppercase;
-            letter-spacing: 10px;
-            text-shadow: 
-                0 0 10px var(--neon-blue),
-                2px 2px 0px #000;
-            font-style: italic;
             text-align: center;
+            text-shadow: 0 0 30px rgba(0, 243, 255, 0.4);
+            transform: skew(-5deg);
         }
 
-        p.subtitle {
-            color: var(--neon-yellow);
-            letter-spacing: 4px;
-            margin-bottom: 40px;
-            font-size: 14px;
-            opacity: 1;
-            font-weight: bold;
-            text-shadow: 1px 1px 0 #000;
-        }
-
-        button {
-            background: rgba(0,0,0,0.5);
-            color: #fff;
-            border: 2px solid var(--neon-blue);
-            padding: 15px 50px;
-            font-size: 24px;
+        .subtitle {
+            color: var(--primary);
+            font-size: 1.2rem;
+            letter-spacing: 8px;
             font-weight: 900;
+            margin-bottom: 40px;
+            text-shadow: 2px 2px 0px #000;
+        }
+
+        .btn {
+            background: transparent;
+            color: white;
+            border: 2px solid var(--secondary);
+            padding: 15px 40px;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 900;
+            letter-spacing: 3px;
             text-transform: uppercase;
             cursor: pointer;
-            transition: 0.2s;
-            box-shadow: 0 0 15px var(--neon-blue);
-            letter-spacing: 2px;
-            clip-path: polygon(10% 0, 100% 0, 100% 70%, 90% 100%, 0 100%, 0 30%);
+            transition: all 0.2s ease;
+            box-shadow: 0 0 15px inset rgba(0,243,255,0.2), 0 0 15px rgba(0,243,255,0.2);
+            clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
         }
 
-        button:hover {
-            background: var(--neon-blue);
-            color: #000;
+        .btn:hover {
+            background: var(--secondary);
+            color: var(--dark);
+            box-shadow: 0 0 30px var(--secondary);
             transform: scale(1.05);
-            box-shadow: 0 0 30px var(--neon-blue);
         }
 
-        /* MOBILE CONTROLS */
-        .controls-area {
+        .controls-hint {
+            margin-top: 30px;
+            color: #94a3b8;
+            font-size: 0.85rem;
+            display: flex;
+            gap: 20px;
+        }
+        .key {
+            background: rgba(255,255,255,0.1);
+            padding: 4px 8px;
+            border-radius: 4px;
+            border-bottom: 2px solid rgba(255,255,255,0.3);
+            color: white;
+            font-family: monospace;
+        }
+
+        /* Mobile Controls */
+        .mobile-controls {
             position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 180px;
-            display: none; /* Flex on mobile */
+            bottom: 0; left: 0; width: 100%; height: 35vh;
+            display: none;
             pointer-events: auto;
             padding: 20px;
             box-sizing: border-box;
-            justify-content: space-between;
+            z-index: 6;
         }
+
+        .touch-zone {
+            position: absolute;
+            width: 50%; height: 100%;
+            top: 0;
+            display: flex;
+            align-items: flex-end;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .touch-zone.left { left: 0; justify-content: flex-start; }
+        .touch-zone.right { right: 0; justify-content: flex-end; }
 
         .touch-btn {
-            width: 80px;
-            height: 80px;
+            width: 80px; height: 80px;
+            background: rgba(15, 23, 42, 0.6);
+            border: 2px solid rgba(255,255,255,0.2);
             border-radius: 50%;
-            background: rgba(0, 0, 0, 0.3);
-            border: 2px solid rgba(255, 255, 255, 0.6);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 30px;
-            color: white;
+            display: flex; justify-content: center; align-items: center;
+            color: white; font-size: 24px;
             backdrop-filter: blur(5px);
-            touch-action: manipulation;
+            transition: background 0.1s;
         }
-        .touch-btn:active { background: var(--neon-blue); border-color: white; transform: scale(0.95); }
+        .touch-btn:active { background: var(--secondary); color: #000; transform: scale(0.9); }
 
-        .d-pad { display: flex; gap: 20px; align-items: flex-end; }
-        .action-pad { display: flex; gap: 20px; align-items: flex-end; }
-        
-        /* Floating Text Animation */
         .float-text {
             position: absolute;
-            color: var(--neon-yellow);
-            font-weight: bold;
-            font-size: 24px;
+            color: white;
+            font-family: 'Black Ops One', cursive;
+            font-size: 2rem;
             pointer-events: none;
-            animation: floatUp 0.8s forwards;
-            text-shadow: 2px 2px 0px black;
+            text-shadow: 0px 4px 10px rgba(0,0,0,0.8);
+            animation: floatUpFade 1s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+            z-index: 20;
+            transform: translate(-50%, -50%);
         }
-        @keyframes floatUp {
-            to { transform: translateY(-100px); opacity: 0; }
+
+        @keyframes floatUpFade {
+            0% { transform: translate(-50%, -50%) scale(0.5); opacity: 1; }
+            50% { transform: translate(-50%, -100px) scale(1.2); opacity: 1; }
+            100% { transform: translate(-50%, -150px) scale(1); opacity: 0; }
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(255, 51, 102, 0.4); }
+            70% { box-shadow: 0 0 0 15px rgba(255, 51, 102, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 51, 102, 0); }
         }
 
         @media (max-width: 768px) {
-            .hud-top {
-                flex-wrap: wrap;
-            }
-            .hud-bottom {
-                grid-template-columns: 1fr;
-                width: min(260px, 100%);
-            }
-            .hud-stat {
-                font-size: 14px;
-                padding: 8px 12px;
-            }
+            .mobile-controls { display: block; }
+            .hud-top { flex-direction: column; gap: 10px; }
+            .score-board { width: 100%; justify-content: space-between; }
+            .controls-hint { display: none; }
+            .ui-layer { padding-bottom: 30vh; }
         }
-
     </style>
 </head>
 <body>
 
 <div id="game-container">
-    <!-- UI HUD -->
     <div class="ui-layer">
         <div class="hud-top">
-            <div class="hud-stat">
-                <span>SCORE</span>
-                <div id="scoreEl">0000</div>
+            <div class="score-board">
+                <div class="hud-panel">
+                    <span>SCORE</span>
+                    <div class="value" id="ui-score">00000</div>
+                </div>
+                <div class="hud-panel" id="ui-speed-panel">
+                    <span>SPEED</span>
+                    <div class="value" id="ui-speed">0 <small style="font-size:1rem">MPH</small></div>
+                </div>
             </div>
-            <div class="hud-stat turbo" id="speedBox">
-                <span>SPEED</span>
-                <div id="speedEl">0 MPH</div>
+            <div class="meters">
+                <div class="meter-container">
+                    <div class="meter-label">INTEGRITY <span id="ui-hp-val">100%</span></div>
+                    <div class="meter-track"><div class="meter-fill fill-health" id="ui-hp"></div></div>
+                </div>
+                <div class="meter-container">
+                    <div class="meter-label">FUEL <span id="ui-fuel-val">100%</span></div>
+                    <div class="meter-track"><div class="meter-fill fill-fuel" id="ui-fuel"></div></div>
+                </div>
+                <div class="meter-container">
+                    <div class="meter-label">NITRO <span id="ui-turbo-val">RDY</span></div>
+                    <div class="meter-track"><div class="meter-fill fill-turbo" id="ui-turbo"></div></div>
+                </div>
             </div>
         </div>
-        <div class="hud-bottom">
-            <div class="meter">
-                HEALTH
-                <div class="meter-fill-wrap"><div class="meter-fill health" id="healthEl"></div></div>
-            </div>
-            <div class="meter">
-                FUEL
-                <div class="meter-fill-wrap"><div class="meter-fill fuel" id="fuelEl"></div></div>
-            </div>
-            <div class="meter">
-                TURBO
-                <div class="meter-fill-wrap"><div class="meter-fill turbo" id="turboEl"></div></div>
-            </div>
-        </div>
-        <div id="pauseTag">PAUSED</div>
+        <div id="ui-paused" style="display:none; text-align:center; font-family:'Black Ops One'; font-size:4rem; color:white; text-shadow:0 0 20px var(--secondary); letter-spacing: 5px; margin: auto;">PAUSED</div>
     </div>
 
-    <!-- TOUCH CONTROLS -->
-    <div class="controls-area" id="mobileControls">
-        <div class="d-pad">
-            <div class="touch-btn" id="btnLeft">◀</div>
-            <div class="touch-btn" id="btnRight">▶</div>
+    <!-- Mobile Overlay -->
+    <div class="mobile-controls">
+        <div class="touch-zone left">
+            <div style="display:flex; gap:10px;">
+                <div class="touch-btn" id="btn-left">◀</div>
+                <div class="touch-btn" id="btn-right">▶</div>
+            </div>
         </div>
-        <div class="action-pad">
-            <div class="touch-btn" id="btnBrake" style="border-color: #ff0055;">🛑</div>
-            <div class="touch-btn" id="btnGas" style="border-color: var(--neon-green);">⚡</div>
+        <div class="touch-zone right">
+            <div style="display:flex; gap:10px; flex-direction: column; align-items:flex-end;">
+                <div class="touch-btn" id="btn-turbo" style="border-color:var(--secondary); color:var(--secondary);">⚡</div>
+                <div style="display:flex; gap:10px;">
+                    <div class="touch-btn" id="btn-brake" style="border-color:var(--primary); color:var(--primary);">🛑</div>
+                    <div class="touch-btn" id="btn-gas" style="border-color:var(--success); color:var(--success);">▲</div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- START SCREEN -->
-    <div id="startScreen" class="screen">
-        <h1>TURBO<br>RUSH</h1>
-        <p class="subtitle">DAYTIME EDITION</p>
-        <button onclick="initGame()">START ENGINE</button>
-        <p style="margin-top: 20px; font-size: 12px; color: #fff; text-shadow: 1px 1px 2px #000;">ARROWS to Drive • SPACE Turbo • P Pause</p>
+    <!-- Start Menu -->
+    <div id="screen-start" class="screen">
+        <h1 class="title">TURBO<br>RUSH</h1>
+        <div class="subtitle">SUNSET OVERDRIVE</div>
+        <button class="btn" onclick="GameApp.start()">IGNITE ENGINE</button>
+        <div class="controls-hint">
+            <span><span class="key">W/A/S/D</span> or <span class="key">ARROWS</span> to Drive</span>
+            <span><span class="key">SPACE</span> Nitro</span>
+            <span><span class="key">P</span> Pause</span>
+        </div>
+        <div style="margin-top:20px; color:#94a3b8; font-size:0.8rem;">HIGH SCORE: <span id="ui-highscore-start" style="color:var(--secondary); font-weight:bold;">0</span></div>
     </div>
 
-    <!-- GAME OVER SCREEN -->
-    <div id="gameOverScreen" class="screen hidden">
-        <h1 style="color: #ff0055; text-shadow: 0 0 30px #ff0055;">CRASHED</h1>
-        <div class="hud-stat" style="margin: 30px; transform: none; font-size: 30px;">
+    <!-- Game Over -->
+    <div id="screen-gameover" class="screen hidden">
+        <h1 class="title" style="background: linear-gradient(180deg, #fff 0%, var(--primary) 100%); -webkit-text-stroke: 2px var(--primary); text-shadow: 0 0 30px rgba(255, 51, 102, 0.4);">WRECKED</h1>
+        <div class="hud-panel" style="margin: 30px 0; transform: none; text-align: center; padding: 20px 40px;">
             <span>FINAL SCORE</span>
-            <div id="finalScore">0</div>
+            <div class="value" id="ui-final-score" style="font-size: 3rem; color: var(--secondary);">0</div>
         </div>
-        <button onclick="resetGame()">RETRY</button>
+        <button class="btn" onclick="GameApp.start()">PLAY AGAIN</button>
     </div>
 </div>
 
 <script>
-    // --- 1. SETUP THREE.JS SCENE ---
-    let scene, camera, renderer;
-    let gameActive = false;
-
-    // Game Objects
-    let playerCar;
-    let roadPlane, roadGrid;
-    let mountainMesh;
-    let rainSystem;
-    let sun;
-    let sunLight;
-    
-    // Arrays for dynamic objects
-    let enemies = [];
-    let items = []; 
-    let clouds = [];
-    let laneMarkers = [];
-    let roadsideProps = [];
-
-    // Game State
-    let speed = 0;
-    let maxSpeed = 2.2; 
-    let score = 0;
-    let distance = 0;
-    let health = 100;
-    let fuel = 100;
-    let turbo = 25;
-    let paused = false;
-    let turboActiveUntil = 0;
-    let lastHitAt = 0;
-    let dayTick = 0;
-    let lane = 1; // 0=Left, 1=Center, 2=Right
-    const LANE_X_POS = [-3.5, 0, 3.5]; 
-    let targetX = 0;
-
-    // Inputs
-    const keys = { ArrowLeft: false, ArrowRight: false, ArrowUp: false, ArrowDown: false, Space: false };
-
-    // --- INITIALIZATION ---
-    function initThree() {
-        const container = document.getElementById('game-container');
-        
-        // Scene w/ Fog (Bright Day Blue)
-        scene = new THREE.Scene();
-        const skyColor = 0x87CEEB; // Sky Blue
-        scene.fog = new THREE.FogExp2(skyColor, 0.015); 
-        scene.background = new THREE.Color(skyColor);
-
-        // Camera
-        camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.set(0, 3.5, 7);
-        camera.lookAt(0, 0, -10);
-
-        // Renderer
-        renderer = new THREE.WebGLRenderer({ antialias: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.shadowMap.enabled = true;
-        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-        container.appendChild(renderer.domElement);
-
-        // Lights (Brighter for Day)
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.8); // High ambient light
-        scene.add(ambientLight);
-
-        // Sun Light (Bright Yellow/White)
-        sunLight = new THREE.DirectionalLight(0xffffee, 1.2);
-        sunLight.position.set(20, 50, -20);
-        sunLight.castShadow = true;
-        sunLight.shadow.mapSize.width = 1024;
-        sunLight.shadow.mapSize.height = 1024;
-        scene.add(sunLight);
-        
-        createEnvironment();
-        createPlayerCar();
-        createRain();
-        createClouds();
-        createRoadsideProps();
-        
-        // Resize Handler
-        window.addEventListener('resize', onWindowResize, false);
+/**
+ * AUDIO ENGINE (Synthesized - No external assets needed)
+ * Uses Web Audio API to generate engine sounds, crashes, and blips.
+ */
+class SoundEngine {
+    constructor() {
+        this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+        this.masterGain = this.ctx.createGain();
+        this.masterGain.gain.value = 0.5;
+        this.masterGain.connect(this.ctx.destination);
+        this.engineOsc = null;
+        this.engineGain = null;
+        this.enabled = false;
     }
 
-    // --- OBJECT CREATION ---
+    init() {
+        if(this.enabled) return;
+        this.enabled = true;
+        this.ctx.resume();
+        
+        // Continuous Engine Sound
+        this.engineOsc = this.ctx.createOscillator();
+        this.engineOsc.type = 'sawtooth';
+        this.engineGain = this.ctx.createGain();
+        this.engineGain.gain.value = 0; // Starts silent
+        
+        // Lowpass filter to muffle the harsh sawtooth
+        const filter = this.ctx.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.value = 150;
 
-    function createEnvironment() {
-        // 1. Moving Road (Asphalt Grey)
-        const geometry = new THREE.PlaneGeometry(60, 400);
-        const material = new THREE.MeshStandardMaterial({ 
-            color: 0x444444, // Grey Asphalt
-            roughness: 0.8,
-            metalness: 0.2
+        this.engineOsc.connect(filter);
+        filter.connect(this.engineGain);
+        this.engineGain.connect(this.masterGain);
+        this.engineOsc.start();
+    }
+
+    updateEngine(speedRatio) {
+        if(!this.enabled || !this.engineOsc) return;
+        // Frequency rises with speed (idle at 40Hz, max 120Hz)
+        const targetFreq = 40 + (speedRatio * 80);
+        this.engineOsc.frequency.setTargetAtTime(targetFreq, this.ctx.currentTime, 0.1);
+        
+        // Volume rises with speed
+        const targetGain = 0.1 + (speedRatio * 0.2);
+        this.engineGain.gain.setTargetAtTime(targetGain, this.ctx.currentTime, 0.1);
+    }
+
+    stopEngine() {
+        if(this.engineGain) this.engineGain.gain.setTargetAtTime(0, this.ctx.currentTime, 0.5);
+    }
+
+    play(type) {
+        if(!this.enabled) return;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.connect(gain);
+        gain.connect(this.masterGain);
+
+        const now = this.ctx.currentTime;
+        if(type === 'coin') {
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(800, now);
+            osc.frequency.exponentialRampToValueAtTime(1200, now + 0.1);
+            gain.gain.setValueAtTime(0.3, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+            osc.start(now);
+            osc.stop(now + 0.3);
+        } else if (type === 'crash') {
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(100, now);
+            osc.frequency.exponentialRampToValueAtTime(20, now + 0.3);
+            gain.gain.setValueAtTime(0.5, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+            osc.start(now);
+            osc.stop(now + 0.4);
+        } else if (type === 'turbo') {
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(200, now);
+            osc.frequency.exponentialRampToValueAtTime(600, now + 0.5);
+            gain.gain.setValueAtTime(0.4, now);
+            gain.gain.linearRampToValueAtTime(0, now + 0.8);
+            osc.start(now);
+            osc.stop(now + 0.8);
+        } else if (type === 'fuel') {
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(400, now);
+            osc.frequency.linearRampToValueAtTime(600, now + 0.2);
+            gain.gain.setValueAtTime(0.3, now);
+            gain.gain.linearRampToValueAtTime(0, now + 0.2);
+            osc.start(now);
+            osc.stop(now + 0.2);
+        }
+    }
+}
+
+/**
+ * MAIN GAME ENGINE
+ * Architecture: ES6 Class holding state, logic, and Three.js rendering.
+ */
+class GameEngine {
+    constructor() {
+        // Core WebGL
+        this.scene = null;
+        this.camera = null;
+        this.renderer = null;
+        
+        // Game State
+        this.state = {
+            active: false,
+            paused: false,
+            score: 0,
+            highScore: localStorage.getItem('turbo_highscore') || 0,
+            distance: 0,
+            speed: 0,
+            maxSpeed: 80, // Units per second
+            acceleration: 40,
+            braking: 60,
+            friction: 15,
+            health: 100,
+            fuel: 100,
+            turbo: 100,
+            isTurbo: false,
+            turboTimer: 0,
+            lane: 1, // 0: Left, 1: Center, 2: Right
+            targetX: 0
+        };
+
+        // Configuration
+        this.LANE_WIDTH = 3.5;
+        this.LANES = [-this.LANE_WIDTH, 0, this.LANE_WIDTH];
+        this.COLORS = {
+            sky: 0xff6b6b,
+            fog: 0x2d1b4e,
+            road: 0x1a1a2e,
+            line: 0x00f3ff,
+            player: 0xff0055,
+            sun: 0xffd700
+        };
+
+        // Entities
+        this.player = null;
+        this.playerBox = new THREE.Box3(); // For collision
+        this.enemies = [];
+        this.items = [];
+        this.particles = [];
+        this.scenery = [];
+        this.roadLines = [];
+        
+        // Systems
+        this.audio = new SoundEngine();
+        this.keys = { up: false, down: false, left: false, right: false, space: false };
+        this.lastTime = 0;
+        this.cameraShake = 0;
+        
+        // Bindings
+        this.loop = this.loop.bind(this);
+        this.onResize = this.onResize.bind(this);
+        
+        document.getElementById('ui-highscore-start').innerText = this.state.highScore;
+    }
+
+    init() {
+        const container = document.getElementById('game-container');
+        
+        // Init Three.js
+        this.scene = new THREE.Scene();
+        this.scene.fog = new THREE.FogExp2(this.COLORS.fog, 0.008);
+        this.scene.background = new THREE.Color(this.COLORS.sky);
+
+        this.camera = new THREE.PerspectiveCamera(65, window.innerWidth / window.innerHeight, 0.1, 500);
+        this.camera.position.set(0, 4, 8);
+
+        this.renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
+        this.renderer.setSize(window.innerWidth, window.innerHeight);
+        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // Perf optimization
+        this.renderer.shadowMap.enabled = true;
+        this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        container.appendChild(this.renderer.domElement);
+
+        this.buildWorld();
+        this.bindEvents();
+        
+        // Start Render Loop
+        requestAnimationFrame(this.loop);
+    }
+
+    buildWorld() {
+        // Lighting: Sunset Vibe
+        const ambient = new THREE.AmbientLight(0xffffff, 0.4);
+        this.scene.add(ambient);
+
+        const dirLight = new THREE.DirectionalLight(0xffaa55, 1.2);
+        dirLight.position.set(-20, 40, -40);
+        dirLight.castShadow = true;
+        dirLight.shadow.camera.top = 20;
+        dirLight.shadow.camera.bottom = -20;
+        dirLight.shadow.camera.left = -20;
+        dirLight.shadow.camera.right = 20;
+        dirLight.shadow.camera.far = 100;
+        dirLight.shadow.mapSize.width = 1024;
+        dirLight.shadow.mapSize.height = 1024;
+        this.scene.add(dirLight);
+
+        // The Sun
+        const sunGeo = new THREE.CircleGeometry(60, 64);
+        const sunMat = new THREE.MeshBasicMaterial({ color: this.COLORS.sun, fog: false });
+        const sun = new THREE.Mesh(sunGeo, sunMat);
+        sun.position.set(0, 10, -300);
+        this.scene.add(sun);
+
+        // Road Base
+        const roadGeo = new THREE.PlaneGeometry(60, 600);
+        const roadMat = new THREE.MeshStandardMaterial({ color: this.COLORS.road, roughness: 0.8 });
+        const road = new THREE.Mesh(roadGeo, roadMat);
+        road.rotation.x = -Math.PI / 2;
+        road.position.z = -200;
+        road.receiveShadow = true;
+        this.scene.add(road);
+
+        // Neon Edges
+        const edgeGeo = new THREE.BoxGeometry(0.5, 0.2, 600);
+        const edgeMat = new THREE.MeshBasicMaterial({ color: this.COLORS.line });
+        [-7, 7].forEach(x => {
+            const edge = new THREE.Mesh(edgeGeo, edgeMat);
+            edge.position.set(x, 0.1, -200);
+            this.scene.add(edge);
         });
-        roadPlane = new THREE.Mesh(geometry, material);
-        roadPlane.rotation.x = -Math.PI / 2;
-        roadPlane.position.z = -100;
-        roadPlane.receiveShadow = true;
-        scene.add(roadPlane);
 
-        // Lane Markings for motion depth
-        const laneMarkerGeo = new THREE.BoxGeometry(0.18, 0.02, 2.2);
-        const laneMarkerMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.6 });
-        for(let i = 0; i < 40; i++) {
-            [-1.75, 1.75].forEach(x => {
-                const marker = new THREE.Mesh(laneMarkerGeo, laneMarkerMat);
-                marker.position.set(x, 0.02, -i * 10);
-                marker.receiveShadow = true;
-                scene.add(marker);
-                laneMarkers.push(marker);
+        // Moving Lane Lines
+        const lineGeo = new THREE.PlaneGeometry(0.2, 3);
+        const lineMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.5 });
+        for(let i=0; i<30; i++) {
+            [-this.LANE_WIDTH/2, this.LANE_WIDTH/2].forEach(x => {
+                const line = new THREE.Mesh(lineGeo, lineMat);
+                line.rotation.x = -Math.PI / 2;
+                line.position.set(x, 0.02, -i * 10);
+                this.scene.add(line);
+                this.roadLines.push(line);
             });
         }
 
-        // 2. The Sun (Bright Yellow Sphere)
-        const sunGeo = new THREE.CircleGeometry(40, 64);
-        const sunMat = new THREE.MeshBasicMaterial({ color: 0xffff00, fog: false });
-        sun = new THREE.Mesh(sunGeo, sunMat);
-        sun.position.set(0, 30, -200);
-        scene.add(sun);
-
-        // 3. Procedural Mountains (Green/Earth Tones)
-        const mountGeo = new THREE.PlaneGeometry(300, 60, 40, 1);
-        const positions = mountGeo.attributes.position.array;
-        
-        // Randomize height
-        for(let i = 0; i < positions.length; i+=3) {
-            if(positions[i+1] > 0) {
-                positions[i+1] = Math.random() * 30 + 10;
-            }
+        // Procedural Mountains (Low Poly)
+        const mountGeo = new THREE.PlaneGeometry(400, 100, 30, 10);
+        const pos = mountGeo.attributes.position.array;
+        for(let i = 0; i < pos.length; i+=3) {
+            if(pos[i+1] > 0) pos[i+1] = Math.random() * 40;
         }
         mountGeo.computeVertexNormals();
-
-        const mountMat = new THREE.MeshStandardMaterial({
-            color: 0x2d4c1e, // Dark Green
-            roughness: 0.9,
-            metalness: 0.0,
-            flatShading: true
+        const mountMat = new THREE.MeshStandardMaterial({ 
+            color: 0x1a0b2e, flatShading: true, roughness: 1 
         });
+        const mountains = new THREE.Mesh(mountGeo, mountMat);
+        mountains.position.set(0, -5, -280);
+        this.scene.add(mountains);
 
-        mountainMesh = new THREE.Mesh(mountGeo, mountMat);
-        mountainMesh.position.set(0, 0, -180);
-        scene.add(mountainMesh);
-    }
-
-    function createRoadsideProps() {
-        const trunkMat = new THREE.MeshStandardMaterial({ color: 0x5a381e, roughness: 0.9 });
-        const leafMat = new THREE.MeshStandardMaterial({ color: 0x2f8f2d, roughness: 0.8 });
-        const signMat = new THREE.MeshStandardMaterial({ color: 0xeeeeee, roughness: 0.6 });
-
-        for(let i = 0; i < 28; i++) {
-            const group = new THREE.Group();
-            const isTree = Math.random() > 0.3;
-
-            if(isTree) {
-                const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.2, 1.4, 8), trunkMat);
-                trunk.position.y = 0.7;
-                const top = new THREE.Mesh(new THREE.SphereGeometry(0.8, 10, 10), leafMat);
-                top.position.y = 1.8;
-                group.add(trunk, top);
-            } else {
-                const post = new THREE.Mesh(new THREE.BoxGeometry(0.1, 1.4, 0.1), trunkMat);
-                post.position.y = 0.7;
-                const board = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.6, 0.08), signMat);
-                board.position.y = 1.6;
-                group.add(post, board);
-            }
-
-            const side = Math.random() > 0.5 ? 1 : -1;
-            group.position.set(side * (10 + Math.random() * 8), 0, -Math.random() * 220);
-            group.userData.side = side;
-            scene.add(group);
-            roadsideProps.push(group);
-        }
-    }
-
-    function createRain() {
-        // Lighter Rain for Day
-        const rainCount = 1500;
-        const rainGeo = new THREE.BufferGeometry();
-        const rainPos = [];
-
-        for(let i=0; i<rainCount; i++) {
-            rainPos.push(
-                (Math.random() - 0.5) * 100, // x
-                Math.random() * 40,          // y
-                (Math.random() - 0.5) * 60 - 20 // z
-            );
-        }
-
-        rainGeo.setAttribute('position', new THREE.Float32BufferAttribute(rainPos, 3));
-        const rainMat = new THREE.PointsMaterial({
-            color: 0xccccff, // Light blueish white
-            size: 0.15,
-            transparent: true,
-            opacity: 0.5
-        });
-
-        rainSystem = new THREE.Points(rainGeo, rainMat);
-        scene.add(rainSystem);
-    }
-
-    function createClouds() {
-        // Fluffy White Clouds
-        const cloudGeo = new THREE.BoxGeometry(5, 2, 3);
-        const cloudMat = new THREE.MeshBasicMaterial({ 
-            color: 0xffffff, 
-            transparent: true, 
-            opacity: 0.7
-        });
-
-        for(let i=0; i<15; i++) {
-            const cloud = new THREE.Mesh(cloudGeo, cloudMat);
-            cloud.position.set(
-                (Math.random() - 0.5) * 100,
-                20 + Math.random() * 10,
-                -Math.random() * 150
-            );
-            cloud.scale.set(Math.random()*3+2, 1, Math.random()*2+1);
-            scene.add(cloud);
-            clouds.push(cloud);
-        }
-    }
-
-    function createPlayerCar() {
-        playerCar = new THREE.Group();
-
-        // Car Body (Sports Red)
-        const bodyGeo = new THREE.BoxGeometry(1.6, 0.4, 3.5);
-        const bodyMat = new THREE.MeshStandardMaterial({ color: 0xff0000, roughness: 0.3, metalness: 0.7 });
+        // Create Player Car (Retro Arcade Style)
+        this.player = new THREE.Group();
+        
+        const bodyGeo = new THREE.BoxGeometry(1.8, 0.5, 4);
+        const bodyMat = new THREE.MeshPhongMaterial({ color: this.COLORS.player, shininess: 100 });
         const body = new THREE.Mesh(bodyGeo, bodyMat);
         body.position.y = 0.5;
         body.castShadow = true;
-        playerCar.add(body);
+        this.player.add(body);
 
-        // Cockpit (Dark Tinted Glass)
-        const cockpitGeo = new THREE.BoxGeometry(1.2, 0.35, 1.5);
-        const cockpitMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.0, metalness: 1.0 });
-        const cockpit = new THREE.Mesh(cockpitGeo, cockpitMat);
-        cockpit.position.set(0, 0.85, -0.3);
-        playerCar.add(cockpit);
-
-        // Wheels
-        const wheelGeo = new THREE.CylinderGeometry(0.35, 0.35, 0.5, 24);
-        const wheelMat = new THREE.MeshStandardMaterial({ color: 0x222222 });
-        const rimGeo = new THREE.CylinderGeometry(0.2, 0.2, 0.52, 16);
-        const rimMat = new THREE.MeshBasicMaterial({ color: 0xcccccc }); // Silver rims
-
-        const wheelPositions = [
-            [-0.9, 0.35, 1.0], [0.9, 0.35, 1.0], 
-            [-0.85, 0.35, -1.2], [0.85, 0.35, -1.2]
-        ];
-
-        wheelPositions.forEach(p => {
-            const w = new THREE.Mesh(wheelGeo, wheelMat);
-            w.rotation.z = Math.PI/2;
-            w.position.set(...p);
-            
-            const r = new THREE.Mesh(rimGeo, rimMat);
-            r.rotation.z = Math.PI/2;
-            r.position.set(...p);
-            
-            playerCar.add(w);
-            playerCar.add(r);
-        });
+        const cabGeo = new THREE.BoxGeometry(1.4, 0.4, 1.8);
+        const cabMat = new THREE.MeshPhongMaterial({ color: 0x111111, shininess: 150 });
+        const cab = new THREE.Mesh(cabGeo, cabMat);
+        cab.position.set(0, 0.95, -0.2);
+        this.player.add(cab);
 
         // Spoiler
-        const spoilerGeo = new THREE.BoxGeometry(1.8, 0.1, 0.5);
-        const spoiler = new THREE.Mesh(spoilerGeo, bodyMat);
-        spoiler.position.set(0, 1.0, 1.6);
-        playerCar.add(spoiler);
-        
-        const spoilerLegL = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.4, 0.2), bodyMat);
-        spoilerLegL.position.set(-0.6, 0.8, 1.5);
-        playerCar.add(spoilerLegL);
-        
-        const spoilerLegR = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.4, 0.2), bodyMat);
-        spoilerLegR.position.set(0.6, 0.8, 1.5);
-        playerCar.add(spoilerLegR);
+        const spoilGeo = new THREE.BoxGeometry(2, 0.1, 0.5);
+        const spoil = new THREE.Mesh(spoilGeo, bodyMat);
+        spoil.position.set(0, 1.1, 1.8);
+        this.player.add(spoil);
+        const sLeg1 = new THREE.Mesh(new THREE.BoxGeometry(0.1,0.4,0.2), bodyMat);
+        sLeg1.position.set(-0.7, 0.8, 1.7);
+        const sLeg2 = sLeg1.clone();
+        sLeg2.position.set(0.7, 0.8, 1.7);
+        this.player.add(sLeg1, sLeg2);
 
-        // Tail Lights
-        const tailLightGeo = new THREE.BoxGeometry(1.4, 0.1, 0.1);
-        const tailLightMat = new THREE.MeshBasicMaterial({ color: 0xff0000 });
-        const tailLight = new THREE.Mesh(tailLightGeo, tailLightMat);
-        tailLight.position.set(0, 0.6, 1.76);
-        playerCar.add(tailLight);
-        
-        // Headlights (Light Cone)
-        /* In day time, headlight beams are less visible, so we reduce intensity or remove the cone 
-           but keep the light source for object highlighting */
-        const carLight = new THREE.PointLight(0xffffff, 0.5, 25);
-        carLight.position.set(0, 2, -5); 
-        playerCar.add(carLight);
-        
-        scene.add(playerCar);
+        this.scene.add(this.player);
     }
 
-    function spawnEnemy() {
-        const laneIdx = Math.floor(Math.random() * 3);
-        const enemy = new THREE.Group();
-        const isTruck = Math.random() > 0.72;
-        const bodyColor = isTruck ? 0x8a8a8a : (Math.random() > 0.5 ? 0x336699 : 0x9b2b2b);
-        const width = isTruck ? 1.8 : 1.5;
-        const height = isTruck ? 2.1 : 1.4;
-        const length = isTruck ? 4.2 : 3.2;
+    bindEvents() {
+        window.addEventListener('resize', this.onResize);
         
-        // Traffic vehicles with slight variation
-        const body = new THREE.Mesh(
-            new THREE.BoxGeometry(width, height, length),
-            new THREE.MeshStandardMaterial({ color: bodyColor, roughness: 0.5, metalness: 0.2 })
-        );
-        body.position.y = height * 0.5;
-        body.castShadow = true;
-        enemy.add(body);
-        
-        const wind = new THREE.Mesh(
-            new THREE.BoxGeometry(width * 0.95, height * 0.35, length * 0.35),
-            new THREE.MeshBasicMaterial({ color: 0x111111 })
-        );
-        wind.position.y = height * 0.7;
-        wind.position.z = -length * 0.2;
-        enemy.add(wind);
+        // Keyboard Map
+        const keyMap = {
+            'ArrowUp': 'up', 'KeyW': 'up',
+            'ArrowDown': 'down', 'KeyS': 'down',
+            'ArrowLeft': 'left', 'KeyA': 'left',
+            'ArrowRight': 'right', 'KeyD': 'right',
+            'Space': 'space'
+        };
 
-        const tail = new THREE.Mesh(
-            new THREE.BoxGeometry(width * 0.7, 0.12, 0.08),
-            new THREE.MeshBasicMaterial({ color: 0xff2222 })
-        );
-        tail.position.set(0, 0.45, length * 0.5 + 0.02);
-        enemy.add(tail);
+        const handleKey = (e, isDown) => {
+            if(e.code === 'KeyP' && isDown) this.togglePause();
+            if(keyMap[e.code]) this.keys[keyMap[e.code]] = isDown;
+        };
 
-        enemy.position.set(LANE_X_POS[laneIdx], 0, -120);
-        enemy.userData = {
-            type: 'enemy',
-            isTruck,
-            speedFactor: 0.7 + Math.random() * 0.6
-        }; 
-        
-        scene.add(enemy);
-        enemies.push(enemy);
+        window.addEventListener('keydown', e => handleKey(e, true));
+        window.addEventListener('keyup', e => handleKey(e, false));
+
+        // Mobile Controls Map
+        const bindTouch = (id, key) => {
+            const el = document.getElementById(id);
+            if(!el) return;
+            el.addEventListener('touchstart', (e) => { e.preventDefault(); this.keys[key] = true; });
+            el.addEventListener('touchend', (e) => { e.preventDefault(); this.keys[key] = false; });
+        };
+        bindTouch('btn-left', 'left');
+        bindTouch('btn-right', 'right');
+        bindTouch('btn-gas', 'up');
+        bindTouch('btn-brake', 'down');
+        bindTouch('btn-turbo', 'space');
     }
 
-    function spawnItem() {
-        const laneIdx = Math.floor(Math.random() * 3);
-        const roll = Math.random();
-        const itemType = roll > 0.8 ? 'nitro' : (roll > 0.55 ? 'fuel' : 'coin');
-        const color = itemType === 'nitro' ? 0x00f3ff : (itemType === 'fuel' ? 0x53ff53 : 0xffd700);
+    start() {
+        this.audio.init();
         
-        const geometry = itemType === 'nitro'
-            ? new THREE.OctahedronGeometry(0.5, 0)
-            : (itemType === 'fuel'
-                ? new THREE.BoxGeometry(0.55, 0.7, 0.4)
-                : new THREE.TorusGeometry(0.4, 0.1, 8, 16));
-
-        // Solid material for day visibility
-        const material = new THREE.MeshPhongMaterial({ 
-            color: color, 
-            shininess: 100,
-            emissive: color,
-            emissiveIntensity: 0.5
-        });
+        document.getElementById('screen-start').classList.add('hidden');
+        document.getElementById('screen-gameover').classList.add('hidden');
+        this.scene.fog.color.setHex(this.COLORS.fog);
         
-        const item = new THREE.Mesh(geometry, material);
-        item.position.set(LANE_X_POS[laneIdx], 0.8, -120);
-        item.userData = { type: itemType };
+        // Reset State
+        this.state = {
+            ...this.state,
+            active: true, paused: false,
+            score: 0, distance: 0, speed: 0,
+            health: 100, fuel: 100, turbo: 100,
+            isTurbo: false, turboTimer: 0,
+            lane: 1, targetX: 0
+        };
+
+        this.player.position.set(0, 0, 0);
+        this.player.rotation.set(0,0,0);
+        this.camera.position.set(0, 4, 8);
+        this.cameraShake = 0;
+        this.lastTime = performance.now();
+
+        // Clear arrays
+        [...this.enemies, ...this.items, ...this.particles].forEach(obj => this.scene.remove(obj.mesh));
+        this.enemies = []; this.items = []; this.particles = [];
         
-        scene.add(item);
-        items.push(item);
+        this.updateUI();
     }
 
-    // --- GAME LOGIC ---
-
-    function initGame() {
-        if(!scene) initThree();
+    stop() {
+        this.state.active = false;
+        this.audio.stopEngine();
         
-        document.getElementById('startScreen').classList.add('hidden');
-        document.getElementById('gameOverScreen').classList.add('hidden');
+        // High Score
+        if(this.state.score > this.state.highScore) {
+            this.state.highScore = Math.floor(this.state.score);
+            localStorage.setItem('turbo_highscore', this.state.highScore);
+        }
         
-        gameActive = true;
-        paused = false;
-        score = 0;
-        speed = 0;
-        distance = 0;
-        health = 100;
-        fuel = 100;
-        turbo = 25;
-        turboActiveUntil = 0;
-        lastHitAt = 0;
-        dayTick = 0;
-        lane = 1;
-        targetX = LANE_X_POS[lane];
-        playerCar.position.set(0, 0, 0);
-        playerCar.rotation.set(0,0,0);
-        camera.position.set(0, 3.5, 7);
-
-        enemies.forEach(e => scene.remove(e));
-        items.forEach(i => scene.remove(i));
-        enemies = [];
-        items = [];
-
-        document.getElementById('pauseTag').style.display = 'none';
-        updateHud();
-
-        animate();
+        document.getElementById('ui-final-score').innerText = Math.floor(this.state.score);
+        document.getElementById('screen-gameover').classList.remove('hidden');
+        
+        // Red flash effect
+        this.scene.fog.color.setHex(0xff0000);
     }
 
-    function resetGame() {
-        initGame();
-    }
-
-    function gameOver() {
-        gameActive = false;
-        document.getElementById('finalScore').innerText = Math.floor(score);
-        document.getElementById('gameOverScreen').classList.remove('hidden');
-    }
-
-    function updateHud() {
-        document.getElementById('scoreEl').innerText = Math.floor(score).toString().padStart(5, '0');
-        document.getElementById('speedEl').innerText = Math.floor(speed * 210) + " MPH";
-        document.getElementById('healthEl').style.transform = `scaleX(${Math.max(0, health) / 100})`;
-        document.getElementById('fuelEl').style.transform = `scaleX(${Math.max(0, fuel) / 100})`;
-        document.getElementById('turboEl').style.transform = `scaleX(${Math.min(100, turbo) / 100})`;
-        document.getElementById('speedBox').classList.toggle('danger', health < 35 || fuel < 20);
-    }
-
-    function togglePause() {
-        if(!gameActive) return;
-        paused = !paused;
-        document.getElementById('pauseTag').style.display = paused ? 'block' : 'none';
-    }
-
-    function update() {
-        if(!gameActive || paused) return;
-
-        const now = performance.now();
-        const turboActive = now < turboActiveUntil;
-
-        // 1. Controls
-        if(keys.ArrowUp && fuel > 0) speed += 0.022;
-        else if(keys.ArrowDown) speed -= 0.06;
-        else speed -= 0.012; // Friction
-
-        if(keys.Space && turbo > 0 && speed > 0.25) {
-            turbo -= 0.55;
-            turboActiveUntil = now + 120;
+    togglePause() {
+        if(!this.state.active) return;
+        this.state.paused = !this.state.paused;
+        document.getElementById('ui-paused').style.display = this.state.paused ? 'block' : 'none';
+        if(this.state.paused) {
+            this.audio.stopEngine();
         } else {
-            turbo = Math.min(100, turbo + 0.04);
+            this.lastTime = performance.now(); // Prevent large dt
+        }
+    }
+
+    // --- GAME LOGIC (Framerate Independent via dt) ---
+
+    updatePhysics(dt) {
+        // 1. Calculate Speed based on inputs
+        this.state.isTurbo = false;
+        let currentMax = this.state.maxSpeed;
+
+        if (this.keys.space && this.state.turbo > 0 && this.state.speed > 20) {
+            this.state.isTurbo = true;
+            this.state.turbo -= 30 * dt; // Drain turbo
+            currentMax *= 1.5;
+            this.camera.fov = THREE.MathUtils.lerp(this.camera.fov, 85, dt * 5);
+            if(Math.random() < 0.3) this.spawnExhaust(); // Visual flair
+        } else {
+            this.state.turbo = Math.min(100, this.state.turbo + 5 * dt); // Recharge slowly
+            this.camera.fov = THREE.MathUtils.lerp(this.camera.fov, 65, dt * 5);
+        }
+        this.camera.updateProjectionMatrix();
+
+        if (this.keys.up && this.state.fuel > 0) {
+            this.state.speed += this.state.acceleration * dt * (this.state.isTurbo ? 2 : 1);
+        } else if (this.keys.down) {
+            this.state.speed -= this.state.braking * dt;
+        } else {
+            this.state.speed -= this.state.friction * dt; // Coasting
         }
 
-        const dynamicMaxSpeed = maxSpeed + (turboActive ? 1.1 : 0);
-        speed = Math.max(0, Math.min(speed, maxSpeed));
-        speed = Math.min(speed, dynamicMaxSpeed);
-
-        fuel -= speed * 0.014 + 0.002;
-        if(fuel <= 0) {
-            fuel = 0;
-            speed = Math.max(0, speed - 0.025);
-        }
-
-        // Lane Change Smoothing
-        if(keys.ArrowLeft && lane > 0 && !playerCar.userData.changing) {
-            lane--;
-            targetX = LANE_X_POS[lane];
-            playerCar.userData.changing = true;
-            setTimeout(() => playerCar.userData.changing = false, 200);
-            tiltCar(0.4);
-        }
-        if(keys.ArrowRight && lane < 2 && !playerCar.userData.changing) {
-            lane++;
-            targetX = LANE_X_POS[lane];
-            playerCar.userData.changing = true;
-            setTimeout(() => playerCar.userData.changing = false, 200);
-            tiltCar(-0.4);
-        }
-
-        // Physics Update
-        playerCar.position.x += (targetX - playerCar.position.x) * 0.15;
-        playerCar.rotation.z += (0 - playerCar.rotation.z) * 0.1;
-
-        // 2. World Animation
-        const moveSpeed = speed * 2;
-
-        // Infinite lane marker loop
-        laneMarkers.forEach(marker => {
-            marker.position.z += moveSpeed;
-            if(marker.position.z > 12) marker.position.z = -390;
-        });
-
-        // Animate Rain
-        const rainPos = rainSystem.geometry.attributes.position.array;
-        for(let i=1; i<rainPos.length; i+=3) {
-            rainPos[i] -= 0.5 + (speed * 0.5); 
-            if(rainPos[i] < 0) rainPos[i] = 40;
-            rainPos[i-1] -= speed * 0.1;
-            if(rainPos[i-1] < -50) rainPos[i-1] = 50;
-        }
-        rainSystem.geometry.attributes.position.needsUpdate = true;
+        // Clamp speed
+        this.state.speed = Math.max(0, Math.min(this.state.speed, currentMax));
         
-        // Move Clouds
-        clouds.forEach(c => {
-            c.position.z += moveSpeed * 0.5; // Clouds move slower
-            if(c.position.z > 20) c.position.z = -150;
-        });
-
-        // Move roadside props
-        roadsideProps.forEach(prop => {
-            prop.position.z += moveSpeed * 0.95;
-            if(prop.position.z > 15) {
-                prop.position.z = -220 - Math.random() * 80;
-                prop.position.x = prop.userData.side * (10 + Math.random() * 8);
-            }
-        });
-
-        // Day progression
-        dayTick += 0.00035 + speed * 0.00006;
-        const daylight = 0.65 + Math.sin(dayTick) * 0.25;
-        sun.position.x = Math.sin(dayTick * 0.8) * 40;
-        sun.position.y = 28 + Math.cos(dayTick * 0.8) * 8;
-        sunLight.intensity = Math.max(0.35, daylight + 0.15);
-        const sky = new THREE.Color().setHSL(0.56, 0.55, 0.55 + daylight * 0.18);
-        scene.background.copy(sky);
-        scene.fog.color.copy(sky);
-
-        // Enemies
-        for(let i = enemies.length - 1; i >= 0; i--) {
-            const e = enemies[i];
-            e.position.z += moveSpeed * e.userData.speedFactor - 0.15;
-            
-            if(Math.abs(e.position.z - playerCar.position.z) < 2.5 && 
-               Math.abs(e.position.x - playerCar.position.x) < 1.0) {
-                if(now - lastHitAt > 800) {
-                    const hitLoss = e.userData.isTruck ? 36 : 24;
-                    health -= hitLoss;
-                    lastHitAt = now;
-                    speed *= 0.55;
-                    camera.position.x = (Math.random() - 0.5) * 1.0;
-                    showFloatText(`-${hitLoss} HP`, window.innerWidth / 2, window.innerHeight / 2);
-                    if(health <= 0) {
-                        health = 0;
-                        updateHud();
-                        gameOver();
-                        return;
-                    }
-                }
-            }
-
-            if(e.position.z > 10) {
-                scene.remove(e);
-                enemies.splice(i, 1);
-                score += 45;
+        // Fuel drain
+        if(this.state.speed > 0) {
+            this.state.fuel -= (0.5 + (this.state.speed * 0.02)) * dt;
+            if(this.state.fuel <= 0) {
+                this.state.fuel = 0;
+                this.state.speed -= this.state.braking * 0.5 * dt; // Force slow down
             }
         }
 
-        // Items
-        for(let i = items.length - 1; i >= 0; i--) {
-            const item = items[i];
-            item.position.z += moveSpeed;
-            item.rotation.y += 0.1;
-            item.rotation.x += 0.1;
+        // 2. Lateral Movement (Lane switching)
+        if (this.keys.left && this.state.lane > 0 && !this.player.userData.changing) {
+            this.state.lane--;
+            this.startLaneChange();
+        }
+        if (this.keys.right && this.state.lane < 2 && !this.player.userData.changing) {
+            this.state.lane++;
+            this.startLaneChange();
+        }
 
-            if(Math.abs(item.position.z - playerCar.position.z) < 1.5 && 
-               Math.abs(item.position.x - playerCar.position.x) < 1.2) {
+        this.state.targetX = this.LANES[this.state.lane];
+        // Lerp player X and Roll for smooth arcade feel
+        this.player.position.x = THREE.MathUtils.lerp(this.player.position.x, this.state.targetX, dt * 10);
+        const tiltTarget = (this.state.targetX - this.player.position.x) * -0.15;
+        this.player.rotation.z = THREE.MathUtils.lerp(this.player.rotation.z, tiltTarget, dt * 10);
+
+        // Update Bounding Box for precise collision
+        this.playerBox.setFromObject(this.player);
+
+        // Update Audio
+        this.audio.updateEngine(this.state.speed / this.state.maxSpeed);
+    }
+
+    startLaneChange() {
+        this.player.userData.changing = true;
+        setTimeout(() => this.player.userData.changing = false, 150);
+    }
+
+    updateEntities(dt) {
+        const moveDist = this.state.speed * dt;
+        this.state.distance += moveDist;
+        this.state.score += moveDist * 0.1;
+
+        // Animate Road Lines
+        this.roadLines.forEach(line => {
+            line.position.z += moveDist;
+            if(line.position.z > 5) line.position.z -= 300;
+        });
+
+        // SPAWNING SYSTEM
+        // Dynamic spawn rate based on speed
+        const spawnChance = 0.5 + (this.state.speed * 0.01); 
+        if(Math.random() < spawnChance * dt) {
+            if(Math.random() > 0.3) this.spawnEnemy();
+            else this.spawnItem();
+        }
+
+        // UPDATE ENEMIES
+        for (let i = this.enemies.length - 1; i >= 0; i--) {
+            const e = this.enemies[i];
+            // Enemies move at their own speed relative to world, player speed moves world
+            const relSpeed = moveDist - (e.speed * dt); 
+            e.mesh.position.z += relSpeed;
+            e.box.setFromObject(e.mesh); // Update AABB
+
+            // Collision Check (AABB Intersection)
+            if (this.playerBox.intersectsBox(e.box) && !e.hit) {
+                e.hit = true;
+                const damage = e.isTruck ? 30 : 15;
+                this.state.health -= damage;
+                this.state.speed *= 0.4; // Crash penalty
+                this.cameraShake = 0.5;
+                this.audio.play('crash');
+                this.createExplosion(e.mesh.position, 0xffaa00);
+                this.showFloatingText(`-${damage} HP`, '#ff3366');
                 
-                if(item.userData.type === 'coin') {
-                    score += 300;
-                    turbo = Math.min(100, turbo + 8);
-                    showFloatText("+300", window.innerWidth/2, window.innerHeight/2);
-                } else if(item.userData.type === 'fuel') {
-                    fuel = Math.min(100, fuel + 28);
-                    showFloatText("FUEL +", window.innerWidth/2, window.innerHeight/2);
-                } else {
-                    turbo = Math.min(100, turbo + 35);
-                    showFloatText("TURBO!", window.innerWidth/2, window.innerHeight/2);
-                    camera.fov = 100;
-                    camera.updateProjectionMatrix();
-                    setTimeout(() => {
-                         camera.fov = 60; 
-                         camera.updateProjectionMatrix();
-                    }, 500);
+                if (this.state.health <= 0) {
+                    this.state.health = 0;
+                    this.stop();
+                    return; // End loop
                 }
-                scene.remove(item);
-                items.splice(i, 1);
             }
-            if(item.position.z > 10) {
-                scene.remove(item);
-                items.splice(i, 1);
+
+            // Cleanup
+            if (e.mesh.position.z > 15) {
+                this.scene.remove(e.mesh);
+                this.enemies.splice(i, 1);
+                this.state.score += 5; // Dodge bonus
             }
         }
 
-        // Spawning
-        if(Math.random() < 0.02 * (speed + 0.5)) spawnEnemy();
-        if(Math.random() < 0.014 + speed * 0.0025) spawnItem();
+        // UPDATE ITEMS
+        for (let i = this.items.length - 1; i >= 0; i--) {
+            const item = this.items[i];
+            item.mesh.position.z += moveDist;
+            item.mesh.rotation.y += 3 * dt;
+            item.mesh.rotation.x += 2 * dt;
+            item.box.setFromObject(item.mesh);
 
-        // Stats
-        score += speed;
-        distance += speed * 0.65;
-        updateHud();
+            if (this.playerBox.intersectsBox(item.box)) {
+                this.audio.play(item.type === 'coin' ? 'coin' : (item.type === 'fuel' ? 'fuel' : 'turbo'));
+                this.createExplosion(item.mesh.position, item.mesh.material.color.getHex(), 10);
+                
+                if(item.type === 'coin') {
+                    this.state.score += 500;
+                    this.showFloatingText('+500', '#ffd700');
+                } else if(item.type === 'fuel') {
+                    this.state.fuel = Math.min(100, this.state.fuel + 40);
+                    this.showFloatingText('+FUEL', '#4cff76');
+                } else {
+                    this.state.turbo = Math.min(100, this.state.turbo + 50);
+                    this.showFloatingText('NITRO!', '#00f3ff');
+                }
+                
+                this.scene.remove(item.mesh);
+                this.items.splice(i, 1);
+                continue;
+            }
 
-        // Camera Follow
-        camera.position.x = playerCar.position.x * 0.4;
-        camera.position.y = 3.4 + Math.sin(distance * 0.03) * 0.05;
+            if (item.mesh.position.z > 15) {
+                this.scene.remove(item.mesh);
+                this.items.splice(i, 1);
+            }
+        }
+
+        // UPDATE PARTICLES
+        for(let i = this.particles.length - 1; i >= 0; i--) {
+            const p = this.particles[i];
+            p.mesh.position.addScaledVector(p.vel, dt);
+            p.mesh.material.opacity -= dt * 2;
+            p.mesh.scale.multiplyScalar(0.95);
+            if(p.mesh.material.opacity <= 0) {
+                this.scene.remove(p.mesh);
+                this.particles.splice(i, 1);
+            }
+        }
     }
 
-    function tiltCar(amount) {
-        playerCar.rotation.z = amount;
+    // --- SPANWERS & FX ---
+
+    spawnEnemy() {
+        // Prevent spawning too close to another entity in the same lane
+        const lane = Math.floor(Math.random() * 3);
+        const zPos = -150 - Math.random() * 50;
+        
+        const tooClose = this.enemies.some(e => e.lane === lane && Math.abs(e.mesh.position.z - zPos) < 20);
+        if(tooClose) return;
+
+        const isTruck = Math.random() > 0.8;
+        const color = isTruck ? 0x555555 : new THREE.Color().setHSL(Math.random(), 0.8, 0.5).getHex();
+        const width = isTruck ? 2.2 : 1.6;
+        const length = isTruck ? 5.5 : 3.5;
+        const height = isTruck ? 2.5 : 1.2;
+
+        const geo = new THREE.BoxGeometry(width, height, length);
+        const mat = new THREE.MeshPhongMaterial({ color, shininess: 50 });
+        const mesh = new THREE.Mesh(geo, mat);
+        mesh.position.set(this.LANES[lane], height/2, zPos);
+        mesh.castShadow = true;
+        this.scene.add(mesh);
+
+        this.enemies.push({
+            mesh,
+            box: new THREE.Box3(),
+            lane: lane,
+            speed: isTruck ? 30 : 45 + Math.random() * 20,
+            isTruck,
+            hit: false
+        });
     }
 
-    function showFloatText(text, x, y) {
+    spawnItem() {
+        const lane = Math.floor(Math.random() * 3);
+        const zPos = -150;
+        const tooClose = this.items.some(i => i.lane === lane && Math.abs(i.mesh.position.z - zPos) < 10);
+        if(tooClose) return;
+
+        const roll = Math.random();
+        let type = 'coin', color = 0xffd700, geo = new THREE.TorusGeometry(0.5, 0.15, 8, 16);
+        
+        if(roll > 0.85) { type = 'nitro'; color = 0x00f3ff; geo = new THREE.OctahedronGeometry(0.6, 0); }
+        else if(roll > 0.65) { type = 'fuel'; color = 0x4cff76; geo = new THREE.BoxGeometry(0.8, 0.8, 0.8); }
+
+        const mat = new THREE.MeshPhongMaterial({ color, emissive: color, emissiveIntensity: 0.5, shininess: 100 });
+        const mesh = new THREE.Mesh(geo, mat);
+        mesh.position.set(this.LANES[lane], 1.5, zPos);
+        this.scene.add(mesh);
+
+        this.items.push({ mesh, box: new THREE.Box3(), type, lane });
+    }
+
+    createExplosion(pos, colorHex, count = 20) {
+        const geo = new THREE.BoxGeometry(0.3, 0.3, 0.3);
+        const mat = new THREE.MeshBasicMaterial({ color: colorHex, transparent: true });
+        for(let i=0; i<count; i++) {
+            const mesh = new THREE.Mesh(geo, mat.clone());
+            mesh.position.copy(pos);
+            mesh.position.y += Math.random();
+            this.scene.add(mesh);
+            this.particles.push({
+                mesh,
+                vel: new THREE.Vector3((Math.random()-0.5)*15, Math.random()*15, (Math.random()-0.5)*15)
+            });
+        }
+    }
+
+    spawnExhaust() {
+        const geo = new THREE.BoxGeometry(0.2, 0.2, 0.2);
+        const mat = new THREE.MeshBasicMaterial({ color: 0x00f3ff, transparent: true });
+        const mesh = new THREE.Mesh(geo, mat);
+        mesh.position.copy(this.player.position);
+        mesh.position.z += 2; // back of car
+        mesh.position.y += 0.2;
+        mesh.position.x += (Math.random()-0.5)*1.5;
+        this.scene.add(mesh);
+        this.particles.push({
+            mesh,
+            vel: new THREE.Vector3(0, Math.random()*2, Math.random()*10 + 10)
+        });
+    }
+
+    // --- UI & RENDERING ---
+
+    updateUI() {
+        document.getElementById('ui-score').innerText = Math.floor(this.state.score).toString().padStart(5, '0');
+        
+        // Convert internal speed to realistic looking MPH
+        const displaySpeed = Math.floor((this.state.speed / this.state.maxSpeed) * 160);
+        document.getElementById('ui-speed').innerHTML = `${displaySpeed} <small style="font-size:1rem">MPH</small>`;
+        
+        const hpEl = document.getElementById('ui-hp');
+        const fuelEl = document.getElementById('ui-fuel');
+        hpEl.style.transform = `scaleX(${Math.max(0, this.state.health)/100})`;
+        fuelEl.style.transform = `scaleX(${Math.max(0, this.state.fuel)/100})`;
+        document.getElementById('ui-turbo').style.transform = `scaleX(${Math.min(100, this.state.turbo)/100})`;
+
+        document.getElementById('ui-hp-val').innerText = `${Math.floor(this.state.health)}%`;
+        document.getElementById('ui-fuel-val').innerText = `${Math.floor(this.state.fuel)}%`;
+        document.getElementById('ui-turbo-val').innerText = this.state.turbo >= 100 ? 'RDY' : `${Math.floor(this.state.turbo)}%`;
+
+        const speedPanel = document.getElementById('ui-speed-panel');
+        if(this.state.isTurbo) speedPanel.className = 'hud-panel turbo';
+        else if(this.state.health < 30 || this.state.fuel < 20) speedPanel.className = 'hud-panel danger';
+        else speedPanel.className = 'hud-panel';
+    }
+
+    showFloatingText(text, color) {
         const el = document.createElement('div');
         el.className = 'float-text';
         el.innerText = text;
-        el.style.left = x + 'px';
-        el.style.top = y + 'px';
+        el.style.color = color;
+        el.style.left = (window.innerWidth / 2) + ((Math.random()-0.5)*100) + 'px';
+        el.style.top = (window.innerHeight / 2) + ((Math.random()-0.5)*100) + 'px';
         document.body.appendChild(el);
-        setTimeout(() => el.remove(), 800);
+        setTimeout(() => el.remove(), 1000);
     }
 
-    function animate() {
-        if(!gameActive) return;
-        requestAnimationFrame(animate);
-        update();
-        renderer.render(scene, camera);
-    }
+    loop(timestamp) {
+        requestAnimationFrame(this.loop);
+        
+        // Calculate Delta Time (cap at 0.1s to prevent physics explosions if tab inactive)
+        let dt = (timestamp - this.lastTime) / 1000;
+        if(dt > 0.1) dt = 0.1; 
+        this.lastTime = timestamp;
 
-    function onWindowResize() {
-        if(camera) {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-        }
-        if(renderer) {
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        }
-    }
-
-    // Input Listeners
-    window.addEventListener('keydown', e => {
-        if(e.code === 'KeyP') {
-            togglePause();
+        if(!this.state.active || this.state.paused) {
+            this.renderer.render(this.scene, this.camera);
             return;
         }
-        if(e.code in keys) keys[e.code] = true;
-        if(e.code === 'Space') keys.Space = true;
-    });
-    window.addEventListener('keyup', e => {
-        if(e.code in keys) keys[e.code] = false;
-        if(e.code === 'Space') keys.Space = false;
-    });
 
-    if('ontouchstart' in window) {
-        document.getElementById('mobileControls').style.display = 'flex';
-        const bindTouch = (id, key) => {
-            const btn = document.getElementById(id);
-            btn.addEventListener('touchstart', (e) => { e.preventDefault(); keys[key] = true; });
-            btn.addEventListener('touchend', (e) => { e.preventDefault(); keys[key] = false; });
-        };
-        bindTouch('btnLeft', 'ArrowLeft');
-        bindTouch('btnRight', 'ArrowRight');
-        bindTouch('btnGas', 'ArrowUp'); 
-        bindTouch('btnBrake', 'ArrowDown');
+        this.updatePhysics(dt);
+        this.updateEntities(dt);
+        this.updateUI();
+
+        // Camera Follow & Shake
+        const camTargetX = this.player.position.x * 0.5;
+        this.camera.position.x = THREE.MathUtils.lerp(this.camera.position.x, camTargetX, dt * 5);
+        
+        if(this.cameraShake > 0) {
+            this.camera.position.x += (Math.random() - 0.5) * this.cameraShake;
+            this.camera.position.y = 4 + (Math.random() - 0.5) * this.cameraShake;
+            this.cameraShake -= dt;
+            if(this.cameraShake < 0) { this.cameraShake = 0; this.camera.position.y = 4; }
+        }
+
+        this.renderer.render(this.scene, this.camera);
     }
+
+    onResize() {
+        if(!this.camera || !this.renderer) return;
+        this.camera.aspect = window.innerWidth / window.innerHeight;
+        this.camera.updateProjectionMatrix();
+        this.renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+}
+
+// Bootstrap
+const GameApp = new GameEngine();
+window.onload = () => {
+    GameApp.init();
+};
 
 </script>
 </body>
