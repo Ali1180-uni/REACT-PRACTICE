@@ -1,16 +1,23 @@
 import { clsx } from "clsx";
+import type { JSX } from "react/jsx-runtime";
+
+type WordLetterType = {
+  currentWord: string
+  guessedLetters: string[]
+  isGameLost: boolean
+}
 
 export default function WordLetters({
   currentWord,
   guessedLetters,
   isGameLost,
-}) {
+}: WordLetterType): JSX.Element {
   return (
     <section className="word">
-      {currentWord.split("").map((letter, index) => {
-        const shouldRevealLetter =
+      {currentWord.split("").map((letter: string, index: number): JSX.Element => {
+        const shouldRevealLetter: boolean =
           isGameLost || guessedLetters.includes(letter);
-        const letterClassName = clsx(
+        const letterClassName: string = clsx(
           isGameLost && !guessedLetters.includes(letter) && "missed-letter",
         );
         return (

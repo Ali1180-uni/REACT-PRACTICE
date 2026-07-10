@@ -1,9 +1,9 @@
-type objectArr = {
+export type LANG = { // Here iam using export due to make this type transferable
     name: string
     backgroundColor: string
     color: string
 }
-export const languages: Array<objectArr> = [
+export const languages: Array<LANG> = [
     {
         name: "HTML",
         backgroundColor: "#E2680F",

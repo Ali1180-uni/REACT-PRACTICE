@@ -6,8 +6,8 @@ import ConfettiContainer from "./components/ConfettiContainer"
 import Header from './components/Header'
 import GameStatus from "./components/GameStatus";
 import LanguageChips from "./components/LanguageChips";
-import WordLetters from "./components/WordLetters";
-import AriaLiveStatus from "./components/AriaLiveStatus";
+import WordLetters from "./components/WordLetter";
+import AriaLiveStatus from "./components/ArialLiveStatus";
 import Keyboard from "./components/Keyboard";
 import NewGameButton from "./components/NewGameButton";
 
