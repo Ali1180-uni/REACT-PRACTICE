@@ -29,7 +29,7 @@ export default function AssemblyEndgame() {
     const isLastGuessIncorrect:boolean = lastGuessedLetter && !currentWord.includes(lastGuessedLetter)
 
     // Static values
-    const alphabet = "abcdefghijklmnopqrstuvwxyz"
+    const alphabet: string = "abcdefghijklmnopqrstuvwxyz"
 
     function addGuessedLetter(letter:string):void {
         setGuessedLetters((prevLetters:string[]):string[] =>
