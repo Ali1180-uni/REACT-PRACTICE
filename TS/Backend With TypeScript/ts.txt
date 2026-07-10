@@ -1,0 +1,15 @@
+// Backend Setup with TS
+npm i -D typescript
+npm i -D @types/express
+
+// Create a tsconfig.json in dir and run this
+npm i -D @tsconfig/node26 
+
+// tsconfig.json Setup
+{
+  "extends": "@tsconfig/node26/tsconfig.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "dist"
+  }
+}
