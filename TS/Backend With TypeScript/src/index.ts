@@ -1,25 +1,20 @@
-import express from 'express'
-import type {Express} from 'express'
+import express from "express";
+import cors from "cors";
+import type { Express, Request, Response } from "express";
+import { pets } from "./data/pets.js";
 
-const PORT = 8000
-const app:Express = express()
+const PORT = 8000;
+const app: Express = express();
+app.use(cors())
 
-/*
-CHALLENGE: Respond with some data!
-1. Create an object called `pet` before the `/` route that includes:
-   - name (string)
-   - species (string)
-   - adopted (boolean)
-   - age (number)
-2. Type your new pet object (inline or using a custom type)
-3. Update your existing GET `/` route to return that pet object
-4. Compile the TypeScript and run the resulting JavaScript to see it in action
-*/
+app.get("/", (req: Request, res: Response): void => {
+  res.json(pets);
+});
 
-app.get('/', (req, res)=> {
-  res.json({})
+app.use((req:Request, res:Response):void=>{
+  res.status(404).json({message: "No route found"})
 })
 
-app.listen(PORT, ():void =>{
-  console.log("Listening on port: ", PORT)
-})
+app.listen(PORT, (): void => {
+  console.log("Listening on port: ", PORT);
+});

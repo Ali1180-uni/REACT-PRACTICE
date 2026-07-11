@@ -15,5 +15,43 @@ npm i -D @tsconfig/node26
 }
 
 // To Build
-npx tsc
+npx 
 
+// Express App type
+import express from "express";
+import type { Express } from "express";
+
+const PORT = 8000;
+const app: Express = express();
+app.listen(PORT, (): void => {
+  console.log("Listening on port: ", PORT);
+});
+
+// Request and Respond type:
+import type { Express, Request, Response } from "express";
+
+const PORT = 8000;
+const app: Express = express();
+
+app.get("/", (req: Request, res: Response): void => {
+  res.json(pets);
+});
+
+
+// Optional Type
+type Pet = {
+  id: number;
+  name: string;
+  species: string;
+  breed: string;
+  age: number;
+  adopted: boolean;
+  intakeDate: Date;
+  adoptionDate?: Date; // Because it is optional and used not in every object thats why i used this "?" best way
+  medicalRecord: {
+    vaccinations: Array<string>;
+    weightKg: number;
+    microchipId: null | string;
+  };
+  photo: string;
+};
