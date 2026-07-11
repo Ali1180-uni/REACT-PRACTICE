@@ -13,3 +13,7 @@ npm i -D @tsconfig/node26
     "outDir": "dist"
   }
 }
+
+// To Build
+npx tsc
+
