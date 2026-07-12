@@ -55,3 +55,15 @@ type Pet = {
   };
   photo: string;
 };
+
+// Response is Generic:
+app.use((req:Request, res:Response<{message:string}>):void=>{  // Here Response is Generic and message decides the type of JSON type which returns
+  res.status(404).json({message: "No endpoint found"})
+})
+
+// Request Generic
+app.get('/:id', (req:Request<{id:string}>, res:Response):void=>{ // Specific id
+  const {id} = req.params
+  const pet = pets.find(pet => pet.id.toString() === id)
+  res.json(pet)
+})
