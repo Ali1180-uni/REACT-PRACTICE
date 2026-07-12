@@ -12,11 +12,10 @@ app.use(cors());
 //   res.json(pets);
 // });
 
-app.get("/:id", petRouter);
+app.use("/pets", petRouter);
 
 // http://localhost:8000/?adopted=true check by this
 // More Flexible
-app.get("/", petRouter);
 
 // Species Specified Setup only
 // app.get(
