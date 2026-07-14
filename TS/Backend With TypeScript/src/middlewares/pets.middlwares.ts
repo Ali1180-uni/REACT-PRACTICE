@@ -33,7 +33,7 @@ TESTS:
 /pets/1?password=please - we should get Bella the dog
 */
 
-export const pleaseAuth = (req:Request<{}, unknown, {}, {password?:string}>, res: Response<{message: string}>, next: NextFunction): void => {
+export const pleaseAuth = (req:Request<{}, unknown, {}, {password?:string}>, res: Response<{message: string}>, next: NextFunction): void => {  // Use these Request Parameters only in Query String
     const {password} = req.query
     if(password !== "please"){
         res.status(401).json({message: "Auth Fails"})
